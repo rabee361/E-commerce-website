@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 
 
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    wish_list = models.ManyToManyField('Product')####################
+    wish_list = models.ManyToManyField('Product')
     cart = models.ForeignKey('Cart',related_name='user',on_delete=models.RESTRICT , blank=True)
 
 
@@ -13,6 +14,7 @@ class Customer(models.Model):
 class Review(models.Model):
     name = models.CharField(max_length=30)
     time = models.DateField()
+    rating = models.PositiveIntegerField()
     text = models.TextField(max_length=150)
     product = models.ForeignKey('Product' , on_delete=models.CASCADE)
 
@@ -46,6 +48,8 @@ class Product(models.Model):
     )
     name = models.CharField(max_length=50)
     decription = models.TextField(max_length=200 , null=True)
+    time_added = models.DateTimeField()
+    rating = models.PositiveIntegerField()
     price = models.FloatField()
     image = models.ImageField(upload_to='static/img/')
     product_type = models.CharField(choices=CHOICES , max_length=40)
@@ -62,6 +66,7 @@ class Product(models.Model):
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, related_name='+' , on_delete=models.CASCADE)
     items = models.ManyToManyField(Product, through='Cart_Products')
+    # total = models.FloatField()
 
     def __str__(self):
         return self.user.username
@@ -72,12 +77,6 @@ class Cart_Products(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
-    total = models.FloatField()
-
-
-
-
-
 
 
 

@@ -50,5 +50,6 @@ def product_detail(request , pk):
     return render(request, 'base/product-detail.html' , context)
 
 
-def cart(request):
+def cart(request,pk):
+    products = Product.objects.filter(quantity__gt=1)
     return render(request, 'base/cart.html' , {})
