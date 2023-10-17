@@ -55,8 +55,7 @@
                         <div class="navbar-nav mr-auto">
                             <a href="{% url 'index' %}" class="nav-item nav-link">Home</a>
                             <a href="{% url 'product-list' %}" class="nav-item nav-link">Products</a>
-                            <a href="{% url 'product-detail' %}" class="nav-item nav-link">Product Detail</a>
-                            <a href="{% url 'cart' %}" class="nav-item nav-link active">Cart</a>
+                            <a href="{% url 'cart' %}" class="nav-item nav-link">Cart</a>
                             <a href="{% url 'checkout' %}" class="nav-item nav-link">Checkout</a>
                             <a href="{% url 'account' %}" class="nav-item nav-link">My Account</a>
                             <div class="nav-item dropdown">
@@ -89,7 +88,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-3">
                         <div class="logo">
-                            <a href="index.html">
+                            <a href="{% url 'index' %}">
                                 <img src="{% static 'img/logo.png' %}" alt="Logo">
                             </a>
                         </div>

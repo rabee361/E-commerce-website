@@ -202,6 +202,8 @@
     
     // Quantity
     $('.qty button').on('click', function () {
+
+        
         var $button = $(this);
         var oldValue = $button.parent().find('input').val();
         if ($button.hasClass('btn-plus')) {
