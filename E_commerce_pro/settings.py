@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import environ
 import os 
 
-from dotenv import load_dotenv
-load_dotenv()
 
 
 env = environ.Env()
@@ -91,6 +89,12 @@ WSGI_APPLICATION = 'E_commerce_pro.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -140,9 +144,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    'base/static'
+    BASE_DIR / 'base/static'
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static') 
+STATIC_ROOT = os.path.join(BASE_DIR, 'base/staticfiles') 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
