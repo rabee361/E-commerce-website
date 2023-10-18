@@ -10,7 +10,7 @@
         "src": "build_files.sh",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "base/staticfiles_build"
+          "distDir": "base/static"
         }
       }
     ],
@@ -24,6 +24,6 @@
         "dest": "E-commerce-pro/wsgi.py"
       }
     ],
-    "outputDirectory": "ui/staticfiles"
+    "outputDirectory": "ui/static"
   }
   
