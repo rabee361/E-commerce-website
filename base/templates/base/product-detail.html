@@ -11,7 +11,7 @@
                         <div class="product-detail-top">
                             <div class="row align-items-center">
                                 <div class="col-md-5">
-                                        <img src="{{product.image.url}}" alt="Product Image">
+                                        <img src="{{product.images.all.first.image.url}}" alt="Product Image">
 
                                     <!-- <div class="product-slider-single-nav normal-slider">
                                         <div class="slider-nav-img"><img src="img/product-1.jpg" alt="Product Image"></div>
@@ -170,7 +170,7 @@
                                         </div>
                                         <div class="product-image">
                                             <a href="{% url 'product-detail' product.id %}">
-                                                <img src="{{ product.image.url }}" alt="Product Image">
+                                                <img src="{{ product.images.all.first.image.url }}" alt="Product Image">
                                             </a>
                                             <div class="product-action">
                                                 <a href="#"><i class="fa fa-cart-plus"></i></a>
