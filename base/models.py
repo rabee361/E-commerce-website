@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import uuid
 
 
 
@@ -15,6 +16,8 @@ class Address(models.Model):
 
 class MyUser(AbstractUser):
     address = models.ForeignKey(Address, on_delete=models.CASCADE , null=True)
+    image = models.ImageField(upload_to='static/img/users')
+
 
 
 
@@ -22,14 +25,15 @@ class MyUser(AbstractUser):
 
 
 class Review(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.ForeignKey(MyUser, on_delete=models.CASCADE)
+    profession = models.CharField(max_length=50,default='None')
     modified = models.DateTimeField(auto_now=True)
     rating = models.PositiveIntegerField()
     text = models.TextField(max_length=150)
-    product = models.ForeignKey('Product' , on_delete=models.CASCADE)
-
+    product = models.ForeignKey('product' , on_delete=models.CASCADE)
     def __str__(self):
-        return f'{self.user.name} : {self.text[0:20]}...'
+        return f'{self.name.username} : {self.text[0:20]}...'
 
 
 
@@ -91,6 +95,9 @@ class Cart(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
     items = models.ManyToManyField(Product ,through='Cart_Products')
 
+    @property
+    def get_items_num(self):
+        return self.items.count()
 
     def __str__(self):
         return f'{self.customer} cart'
@@ -102,6 +109,23 @@ class Cart_Products(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
 
+    class Meta:
+        ordering = ['products__time_added']
+
+    # @property
+    # def total(self):
+    #     return float(self.quantity * self.products.price)
+    
+    @property
+    def add_item(self):
+        self.quantity = self.quantity + 1
+        self.save()
+
+    @property
+    def sub_item(self):
+        self.quantity = self.quantity - 1
+        self.save()
+
     def __str__(self):
         return self.cart.customer.username
 
@@ -112,13 +136,43 @@ class Order(models.Model):
     cart = models.ForeignKey(Cart , on_delete=models.CASCADE)
     shipping_cost = models.FloatField(default=0.00)
     total = models.FloatField(default=0.00)
-    # order_time = models.DateTimeField(auto_now_add=True)
+    order_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.customer
+        return f'{self.customer} wishlist'
     
 
 
 class WhishList(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product)
+    items = models.ManyToManyField(Product , through='Wish_products')
+
+    @property
+    def items_num(self):
+        return self.items.count()
+
+    def __str__(self):
+        return f'{self.customer} wishlist'
+
+
+
+class Wish_products(models.Model):
+    products = models.ForeignKey(Product, on_delete=models.CASCADE)
+    wish_list = models.ForeignKey(WhishList, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['products__time_added']
+
+    @property
+    def add_item(self):
+        self.quantity = self.quantity + 1
+        self.save()
+
+    @property
+    def sub_item(self):
+        self.quantity = self.quantity - 1
+        self.save()
+
+    def __str__(self):
+        return self.wish_list.customer.username

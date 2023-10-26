@@ -42,6 +42,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+RECAPTCHA_PUBLIC_KEY = '6Lchh8goAAAAABEIER5hk4LrZLVwEd0USAsBXuv6'
+RECAPTCHA_PRIVATE_KEY = '6Lchh8goAAAAABDRX2lSfwc3hMEmGSJWiFFCnQNR'
 
 # Application definition
 
@@ -52,7 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'base'
+    'base',
+    'captcha',
+
 ]
 
 MIDDLEWARE = [
@@ -75,6 +79,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
+                'base.context.navbar',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',

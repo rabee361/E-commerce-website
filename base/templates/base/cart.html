@@ -39,16 +39,16 @@
                                                     <p>{{item.products.name}}</p> 
                                                 </div>
                                             </td>
-                                            <td>{{item.products.price}}</td>
+                                            <td>${{item.products.price}}</td>
                                             <td>
                                                 <div class="qty">
-                                                    <button class="btn-minus"><i class="fa fa-minus"></i></button>
+                                                    <a href="{% url 'quantity_handler' pk=item.id pk2='sub'  %}"><button class="btn-minus"><i class="fa fa-minus"></i></button></a>
                                                     <input type="text" value="{{item.quantity}}">
-                                                    <button class="btn-plus"><i class="fa fa-plus"></i></button>
+                                                    <a href="{% url 'quantity_handler' pk=item.id pk2='add'  %}"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                                 </div>
                                             </td>
-                                            <td></td>
-                                            <td><button><i class="fa fa-trash"></i></button></td>
+                                            <td>{{item.total}}</td>
+                                            <td><a href="{% url 'remove-item' item.id %}"><button><i class="fa fa-trash"></i></button></a></td>
                                         </tr>
                                         {% endfor %}
 
@@ -61,18 +61,21 @@
                         <div class="cart-page-inner">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div class="coupon">
-                                        <input type="text" placeholder="Coupon Code">
-                                        <button>Apply Code</button>
-                                    </div>
+                                    <form action="" method="post">
+                                        {% csrf_token %}
+                                        <div class="coupon">
+                                            <input type="text" name="coupon" placeholder="Coupon Code">
+                                            <button>Apply Code</button>
+                                        </div>
+                                    </form>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="cart-summary">
                                         <div class="cart-content">
                                             <h1>Cart Summary</h1>
-                                            <p>Sub Total<span>{{items.}}</span></p>
-                                            <p>Shipping Cost<span>$1</span></p>
-                                            <h2>Grand Total<span>$100</span></h2>
+                                            <p>Sub Total<span>{{sub_total}}</span></p>
+                                            <p>Shipping Cost<span>$20</span></p>
+                                            <h2>Grand Total<span>${{grand_total}}</span></h2>
                                         </div>
                                         <div class="cart-btn">
                                             <button>Update Cart</button>
