@@ -18,7 +18,11 @@ urlpatterns = [
     path('logout/' , logoutUser , name="logout"),
     path('remove-item/<str:pk>' , RemoveItem , name="remove-item"),
     path('quantity_handler/<str:pk>/<str:pk2>' , quantity_handler , name="quantity_handler"),
-    path('wish-handler/<str:pk>/<str:pk2>' , wish_handler , name="wish_handler")
+    path('wish-handler/<str:pk>/<str:pk2>' , wish_handler , name="wish_handler"),
+    path('add-to-cart/<str:pk>' , add_to_cart, name="add-to-cart"),
+    path('add-to-wishes/<str:pk>' , add_to_wishes, name="add-to-wishes"),
+    path('remove-wish/<str:pk>' , Remove_Wish , name="remove-wish")
+
 
 
 

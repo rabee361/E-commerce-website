@@ -21,15 +21,13 @@
                                             <div class="slider-nav-img"><img src="{{image.image.url}}" alt="Product Image"></div>
                                             {% endfor %}
                                         </div>
-                                </div>
+                                </div> 
                                 <div class="col-md-7">
                                     <div class="product-content">
                                         <div class="title"><h2>{{product.name}}
                                         </h2></div>
                                         <div class="ratting">
-                                            {% for i in product.stars %}
                                             <i class="fa fa-star"></i>
-                                            {% endfor %}
                                         </div>
                                         <div class="price">
                                             <h4>Price:</h4>
@@ -42,9 +40,9 @@
                                         <div class="quantity">
                                             <h4>Quantity:</h4>
                                             <div class="qty">
-                                                <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                <input type="text" value="0">
-                                                <button class="btn-plus"><i class="fa fa-plus"></i></button>
+                                                <a href="#"><button class="btn-minus"><i class="fa fa-minus"></i></button></a>
+                                                <input type="text" value="{{quantity.quantity}}">
+                                                <a href="#"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                             </div>
                                         </div>
                                         <div class="p-size">
@@ -160,8 +158,9 @@
                                         <div class="product-title">
                                             <a href="{% url 'product-detail' product.id %}">{{product.name}}</a>
                                             <div class="ratting">
-
+                                                {% for i in "x"|rjust:product.stars %}
                                                 <i class="fa fa-star"></i>
+                                                {% endfor %}
  
                                             </div>
                                         </div>
@@ -170,9 +169,9 @@
                                                 <img src="{{ product.images.all.first.image.url }}" alt="Product Image">
                                             </a>
                                             <div class="product-action">
-                                                <a href="#"><i class="fa fa-cart-plus"></i></a>
-                                                <a href="#"><i class="fa fa-heart"></i></a>
-                                                <a href="#"><i class="fa fa-search"></i></a>
+                                                <a href="{% url 'add-to-cart' product.id %}"><i class="fa fa-cart-plus"></i></a>
+                                                <a href="{% url 'add-to-wishes' product.id %}"><i class="fa fa-heart"></i></a>
+                                                <a href="{% url 'product-detail' product.id %}"><i class="fa fa-search"></i></a>
                                             </div>
                                         </div>
                                         <div class="product-price">

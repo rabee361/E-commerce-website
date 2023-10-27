@@ -36,8 +36,8 @@
                                                     <a href="{% url 'wish_handler' pk=item.id pk2='add'  %}"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                                 </div>
                                             </td>
-                                            <td><button class="btn-cart">Add to Cart</button></td>
-                                            <td><a href="{% url 'remove-item' item.id %}"><button><i class="fa fa-trash"></i></button></a></td>
+                                            <td><a href="{% url 'add-to-cart' item.id %}"><button class="btn-cart">Add to Cart</button></a></td>
+                                            <td><a href="{% url 'remove-wish' item.id %}"><button><i class="fa fa-trash"></i></button></a></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

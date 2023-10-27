@@ -4,24 +4,14 @@ import uuid
 
 
 
-class Address(models.Model):
-    city = models.CharField(max_length=40)
-    neighborhood = models.CharField(max_length=40)
-    detail = models.CharField(max_length=80)
-    building_num = models.IntegerField()
-
-    def __str__(self):
-        return f'{self.city},{self.neighborhood},{self.detail[0:20]}...'
-
-
 class MyUser(AbstractUser):
-    address = models.ForeignKey(Address, on_delete=models.CASCADE , null=True)
+    # address = models.CharField(max_length=150)
+    # mobile = 
+    # country = 
+    # city = 
+    # state = 
+
     image = models.ImageField(upload_to='static/img/users')
-
-
-
-
-
 
 
 class Review(models.Model):
@@ -107,7 +97,7 @@ class Cart(models.Model):
 class Cart_Products(models.Model):
     products = models.ForeignKey(Product, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1)
 
     class Meta:
         ordering = ['products__time_added']
@@ -159,7 +149,7 @@ class WhishList(models.Model):
 class Wish_products(models.Model):
     products = models.ForeignKey(Product, on_delete=models.CASCADE)
     wish_list = models.ForeignKey(WhishList, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1)
 
     class Meta:
         ordering = ['products__time_added']
@@ -175,4 +165,4 @@ class Wish_products(models.Model):
         self.save()
 
     def __str__(self):
-        return self.wish_list.customer.username
+        return self.products.name
