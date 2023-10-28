@@ -218,9 +218,11 @@
                                     <div class="product-title">
                                         <a href="#">{{product.name}}</a>
                                         <div class="ratting">
+                                        {% if product.stars %}
                                             {% for i in "x"|rjust:product.stars %}
                                             <i class="fa fa-star"></i>
                                             {% endfor %}
+                                        {% endif %}
                                         </div>
                                     </div>
                                     <div class="product-image">
@@ -278,9 +280,11 @@
                             <div class="product-title">
                                 <a href="#">{{product.name}}</a>
                                 <div class="ratting">
+                                {% if product.stars %}
                                     {% for i in "x"|rjust:product.stars %}
                                     <i class="fa fa-star"></i>
                                     {% endfor %}
+                                {% endif %}
                                 </div>
                             </div>
                             <div class="product-image">

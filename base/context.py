@@ -7,8 +7,8 @@ def navbar(request):
     cart_items_num = None
     wishlist_items_num = None
     if request.user.is_authenticated:
-        user_cart = Cart.objects.filter(customer=request.user).first()
-        user_wishlist = WhishList.objects.filter(customer=request.user).first()
+        user_cart , created = Cart.objects.get_or_create(customer=request.user)
+        user_wishlist, created = WhishList.objects.get_or_create(customer=request.user)
 
         cart_items_num = user_cart.items.aggregate(Sum('cart_products__quantity'))['cart_products__quantity__sum'] or 0
         wishlist_items_num = user_wishlist.items.aggregate(Sum('wish_products__quantity'))['wish_products__quantity__sum'] or 0

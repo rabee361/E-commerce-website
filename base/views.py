@@ -63,11 +63,11 @@ def contact(request):
 
 @login_required(login_url='auth-login')
 def checkout(request):
+    form = BillingForm(instance=request.user) 
     sub_total = 0.00
     shipping = 20.00
-    cart_items = Cart_Products.objects.select_related('products')\
+    cart_items = Cart_Products.objects.select_related('products','cart__customer')\
                                     .only('products__name','products__price','quantity','cart__customer')\
-                                    .select_related('cart__customer')\
                                     .prefetch_related('products__images')\
                                     .filter(cart__customer=request.user).annotate(
                                         total = ExpressionWrapper(
@@ -75,12 +75,26 @@ def checkout(request):
                                         ))
     if cart_items.aggregate(sub_total = Sum('total'))['sub_total'] : 
         sub_total = cart_items.aggregate(sub_total = Sum('total'))['sub_total'] 
-        
+    
+    # print(cart_items.values_list('products'))
+
     grand_total =  sub_total + shipping 
+    if request.method=='POST':
+        form = BillingForm(request.POST, instance=request.user)
+        if form.is_valid():
+            cart = Cart.objects.get(customer=request.user)
+            order = Order.objects.create(customer=request.user, cart=cart, payment=form.cleaned_data['payment'])
+            order.total = grand_total
+            order.save()
+            form.save()
+            # cart_items.delete()
+            return redirect('account')
+        
     context = {
         'cart_items' : cart_items,
         'sub_total' : sub_total,
-        'grand_total' : grand_total
+        'grand_total' : grand_total,
+        'form' : form
     }
     return render(request, 'base/checkout.html' , context)
 
@@ -193,7 +207,9 @@ def quantity_handler(request,pk,pk2):
     if pk2 == 'add':
         item.add_item
     else:
-        item.sub_item
+        if item.quantity == 1:
+            item.sub_item
+            item.delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 

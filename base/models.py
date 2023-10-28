@@ -1,16 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from phone_field import PhoneField
 
 
 
 class MyUser(AbstractUser):
-    # address = models.CharField(max_length=150)
-    # mobile = 
-    # country = 
-    # city = 
-    # state = 
-
+    address = models.CharField(max_length=150,default=' ')
+    mobile = PhoneField(blank=True, help_text='Contact phone number')
+    country = models.CharField(max_length=30,default=' ')
+    city = models.CharField(max_length=30,default=' ')
+    state = models.CharField(max_length=30,default=' ')
     image = models.ImageField(upload_to='static/img/users')
 
 
@@ -124,12 +124,12 @@ class Cart_Products(models.Model):
 class Order(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart , on_delete=models.CASCADE)
-    shipping_cost = models.FloatField(default=0.00)
     total = models.FloatField(default=0.00)
     order_time = models.DateTimeField(auto_now_add=True)
+    payment = models.CharField(max_length=50, default='Cash')
 
     def __str__(self):
-        return f'{self.customer} wishlist'
+        return f'{self.customer} order'
     
 
 

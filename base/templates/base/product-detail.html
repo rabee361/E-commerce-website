@@ -41,7 +41,11 @@
                                             <h4>Quantity:</h4>
                                             <div class="qty">
                                                 <a href="#"><button class="btn-minus"><i class="fa fa-minus"></i></button></a>
+                                                {% if quantity.quantity %}
                                                 <input type="text" value="{{quantity.quantity}}">
+                                                {% else %}
+                                                <input type="text" value="0">
+                                                {% endif %}
                                                 <a href="#"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                             </div>
                                         </div>
@@ -158,9 +162,11 @@
                                         <div class="product-title">
                                             <a href="{% url 'product-detail' product.id %}">{{product.name}}</a>
                                             <div class="ratting">
+                                            {% if product.stars %}
                                                 {% for i in "x"|rjust:product.stars %}
                                                 <i class="fa fa-star"></i>
                                                 {% endfor %}
+                                            {% endif %}
  
                                             </div>
                                         </div>
