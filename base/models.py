@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 from phone_field import PhoneField
-
+from datetime import datetime
 
 
 class MyUser(AbstractUser):
@@ -17,8 +17,7 @@ class MyUser(AbstractUser):
 class Review(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.ForeignKey(MyUser, on_delete=models.CASCADE)
-    profession = models.CharField(max_length=50,default='None')
-    modified = models.DateTimeField(auto_now=True)
+    # created = models.DateTimeField(auto_now_add=True)
     rating = models.PositiveIntegerField()
     text = models.TextField(max_length=150)
     product = models.ForeignKey('product' , on_delete=models.CASCADE)
@@ -123,7 +122,7 @@ class Cart_Products(models.Model):
 
 class Order(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart , on_delete=models.CASCADE)
+    related_products = models.ManyToManyField(Product)
     total = models.FloatField(default=0.00)
     order_time = models.DateTimeField(auto_now_add=True)
     payment = models.CharField(max_length=50, default='Cash')
@@ -131,6 +130,13 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.customer} order'
     
+
+
+class Product_Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
 
 
 class WhishList(models.Model):

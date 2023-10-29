@@ -41,3 +41,10 @@ class BillingForm(forms.ModelForm):
     class Meta:
         model = MyUser
         fields = ('first_name','last_name','address','mobile','country','city','state','payment')
+
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ('text','rating')

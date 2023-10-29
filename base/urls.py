@@ -21,7 +21,8 @@ urlpatterns = [
     path('wish-handler/<str:pk>/<str:pk2>' , wish_handler , name="wish_handler"),
     path('add-to-cart/<str:pk>' , add_to_cart, name="add-to-cart"),
     path('add-to-wishes/<str:pk>' , add_to_wishes, name="add-to-wishes"),
-    path('remove-wish/<str:pk>' , Remove_Wish , name="remove-wish")
+    path('remove-wish/<str:pk>' , Remove_Wish , name="remove-wish"),
+    path('buy-now/<str:pk>', buy_now , name="buy-now")
 
 
 

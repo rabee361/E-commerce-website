@@ -71,7 +71,7 @@
                                 {% for item in cart_items %}
                                 <p>{{item.products.name}} x {{item.quantity}}<span>${{item.total}}</span></p>
                                 {% endfor %}
-                                <p>Sub Total<span>{{sub_total}}</span></p>
+                                <p>Sub Total<span>${{sub_total}}</span></p>
                                 <p>Shipping Cost<span>$20</span></p>
                                 <h2>Grand Total<span>${{grand_total}}</span></h2>
                             </div>

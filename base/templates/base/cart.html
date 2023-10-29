@@ -35,7 +35,7 @@
                                                     <a href="{% url 'quantity_handler' pk=item.id pk2='add'  %}"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                                 </div>
                                             </td>
-                                            <td>{{item.total}}</td>
+                                            <td>${{item.total}}</td>
                                             <td><a href="{% url 'remove-item' item.id %}"><button><i class="fa fa-trash"></i></button></a></td>
                                         </tr>
                                         {% endfor %}
@@ -61,7 +61,7 @@
                                     <div class="cart-summary">
                                         <div class="cart-content">
                                             <h1>Cart Summary</h1>
-                                            <p>Sub Total<span>{{sub_total}}</span></p>
+                                            <p>Sub Total<span>${{sub_total}}</span></p>
                                             <p>Shipping Cost<span>$20</span></p>
                                             <h2>Grand Total<span>${{grand_total}}</span></h2>
                                         </div>
