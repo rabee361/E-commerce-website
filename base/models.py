@@ -122,7 +122,7 @@ class Cart_Products(models.Model):
 
 class Order(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
-    related_products = models.ManyToManyField(Product)
+    products = models.ManyToManyField(Product)
     total = models.FloatField(default=0.00)
     order_time = models.DateTimeField(auto_now_add=True)
     payment = models.CharField(max_length=50, default='Cash')
@@ -130,12 +130,6 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.customer} order'
     
-
-
-class Product_Order(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
 
 
 

@@ -85,7 +85,7 @@ def checkout(request):
         if form.is_valid():
             cart = Cart.objects.get(customer=request.user)
             products = cart.items.all()
-            order = Order.objects.create(customer=request.user ,payment=form.cleaned_data['payment'])
+            order = Order.objects.create(customer=request.user, payment=form.cleaned_data['payment'])
             order.products.set(products)
             order.total = grand_total
             order.save()
