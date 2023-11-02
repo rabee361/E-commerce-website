@@ -1,7 +1,7 @@
 from django.shortcuts import render , redirect
 from .forms import *
 from .models import *
-from django.db.models import F , Q ,Avg , Sum ,Max , Min ,ExpressionWrapper , FloatField
+from django.db.models import F , Q ,Avg , Sum ,Max , Min ,ExpressionWrapper , FloatField , Count
 from django.contrib.auth import authenticate , login , logout
 from django.core.paginator import Paginator,EmptyPage
 from django.contrib.auth.decorators import login_required
@@ -111,8 +111,22 @@ def wishlist(request):
 def product_list(request , page):
     categories = Product_Category.objects.all()
     q = request.GET.get('q') if request.GET.get('q') != None else ''
-    products = Product.objects.filter(Q(name__contains = q) | Q(product_type__category__contains = q)).annotate(stars = Avg(F('review__rating')))
-    paginator = Paginator(products, 2)
+    if q=='rating':
+        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
+                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('-rating')
+    elif q=='old':
+        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
+                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('rating')
+        
+    # elif q=='sale':
+    #     products = Product.objects.annotate(sale = Count('order__'))\
+    #                                 .annotate(stars = Avg(F('review__rating'))).all()
+
+    else:
+        products = Product.objects.filter(Q(name__contains = q) | Q(product_type__category__contains = q))\
+                                    .annotate(stars = Avg(F('review__rating'))).order_by('-time_added')
+        
+    paginator = Paginator(products, 3)
     try:
         products = paginator.page(page)
     except EmptyPage:
@@ -127,7 +141,7 @@ def product_list(request , page):
 
 @login_required(login_url='auth-login')
 def account(request):
-    orders = Order.objects.filter(customer=request.user)
+    orders = Order.objects.filter(customer=request.user).order_by('-order_time')
     context = {
         'orders' : orders
     }

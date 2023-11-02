@@ -132,7 +132,6 @@ class Order(models.Model):
     
 
 
-
 class WhishList(models.Model):
     customer = models.ForeignKey(MyUser , on_delete=models.CASCADE)
     items = models.ManyToManyField(Product , through='Wish_products')
