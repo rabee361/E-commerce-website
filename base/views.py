@@ -1,13 +1,17 @@
 from django.shortcuts import render , redirect
 from .forms import *
 from .models import *
-from django.db.models import F , Q ,Avg , Sum ,ExpressionWrapper , FloatField , Count
+from django.db.models import F , Q ,Avg , Sum ,ExpressionWrapper , FloatField
 from django.contrib.auth import authenticate , login , logout
 from django.core.paginator import Paginator,EmptyPage
 from django.contrib.auth.decorators import login_required
 
 
-def auth_login(request):
+
+#------------------------ Authentication -----------------------------------------------------#
+
+
+def loginUser(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -21,8 +25,7 @@ def auth_login(request):
 
 
 
-
-def auth_register(request):
+def registerUser(request):
     form = NewUser()
     if request.method == 'POST':
         form = NewUser(request.POST)
@@ -37,12 +40,159 @@ def auth_register(request):
 
 
 
-
 def logoutUser(request):
     logout(request)
     return redirect('auth-login')
 
 
+# ------------------------------ End Authentication ----------------------------------- #
+
+# ------------------------------- Cart & Product --------------------------------------- #
+
+
+
+@login_required(login_url='auth-login')
+def cart(request):
+    sub_total = 0.0
+    shipping = 20.0
+    cart_items = Cart_Products.objects.select_related('products')\
+                                    .only('products__name','products__price','quantity','cart__customer')\
+                                    .select_related('cart__customer')\
+                                    .prefetch_related('products__images')\
+                                    .filter(cart__customer=request.user).annotate(
+                                        total = ExpressionWrapper(
+                                        F('products__price')*F('quantity'), output_field=FloatField()
+                                        ))
+    if cart_items.aggregate(sub_total = Sum('total'))['sub_total'] : 
+        sub_total = cart_items.aggregate(sub_total = Sum('total'))['sub_total'] 
+        
+    grand_total =  sub_total + shipping 
+
+    context = {
+        'cart_items' : cart_items,
+        'sub_total' : sub_total,
+        'grand_total' : grand_total
+    }
+    return render(request, 'base/cart.html' , context)
+
+
+
+
+
+def add_to_cart(request,pk):
+    item = Product.objects.get(id=pk)
+    cart, created = Cart.objects.get_or_create(customer=request.user)
+    cart_products, created = Cart_Products.objects.get_or_create(products=item, cart=cart)
+    if not created:
+        Cart_Products.objects.filter(products=item, cart=cart).\
+                                update(quantity=F('quantity') + 1)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+
+@login_required(login_url='auth-login')
+def product_detail(request , pk):
+    form = ReviewForm()
+    product = Product.objects.get(id=pk)
+    reviews = Review.objects.filter(product=product)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        print(form.is_valid())
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.name = request.user
+            review.product = product
+            print(review)
+            review.save()
+            return redirect(request.path_info)
+
+    related_products = Product.objects.only('name','price','images').prefetch_related('images')\
+                                                                .filter(product_type=product.product_type)\
+                                                            .annotate(stars = Avg(F('review__rating')))
+    context = {
+    'product' : product,
+    'related_products' : related_products,
+    'form' : form,
+    'reviews' : reviews
+    }
+    try:
+        quantity = Cart_Products.objects.select_related('cart').get(products=product,cart__customer=request.user)
+        context['quantity'] = quantity
+
+    except(Product.DoesNotExist ,Cart_Products.DoesNotExist):
+        pass
+
+    return render(request, 'base/product-detail.html' , context)
+
+
+
+
+
+def product_list(request , page):
+    categories = Product_Category.objects.all()
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    if q=='rating':
+        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
+                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('-rating')
+    elif q=='old':
+        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
+                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('rating')
+        
+    else:
+        products = Product.objects.filter(Q(name__contains = q) | Q(product_type__category__contains = q))\
+                                    .annotate(stars = Avg(F('review__rating'))).order_by('-time_added')
+        
+    paginator = Paginator(products, 3)
+    try:
+        products = paginator.page(page)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+    context = {
+        'products' : products,
+        'categories' : categories
+    }
+    return render(request,'base/product-list.html' , context)
+
+
+def quantity_handler(request,pk,pk2):
+    item = Cart_Products.objects.get(id=pk)
+    if pk2 == 'add':
+        item.add_item
+    else:
+        if item.quantity == 1:
+            item.sub_item
+            item.delete()
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+def RemoveItem(request , pk):
+    item = Cart_Products.objects.get(id=pk)
+    item.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+
+
+@login_required(login_url='auth-login')
+def cart_item_number(request):
+    user = request.user
+    cart_items = Cart.objects.get(customer=user).items
+    context = {
+        'cart_items' : cart_items
+    }
+    return render(request , 'base/navbar.html' , context)
+
+
+
+# ----------------------------------- End Cart & Product ---------------------------------- #
+
+
+
+
+#------------------------------------ Home Page --------------------------------------------#
 
 @login_required(login_url='auth-login')
 def index(request):
@@ -65,10 +215,86 @@ def index(request):
 
 
 
+# ----------------------------------- Wish List ------------------------------------- #
+
+
+@login_required(login_url='auth-login')
+def wishlist(request):
+    return render(request, 'base/wishlist.html' , {})
+
+
+def Remove_Wish(request , pk):
+    item = Wish_products.objects.get(id=pk)
+    item.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+def wish_handler(request,pk,pk2):
+    item = Wish_products.objects.get(id=pk)
+    if pk2 == 'add':
+        item.add_item
+    else:
+        item.sub_item
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+def wishlist(request):
+    wishlist = Wish_products.objects.select_related('products')\
+                                    .only('products__name','products__price','quantity')\
+                                    .prefetch_related('products__images')\
+                                    .filter(wish_list__customer=request.user)
+    context = {
+        'wishlist' : wishlist
+    }
+    return render(request, 'base/wishlist.html' , context)
+
+
+
+def add_to_wishes(request,pk):
+    item = Product.objects.get(id=pk)
+    wish_list, created = WhishList.objects.get_or_create(customer=request.user)
+    wish_products, created = Wish_products.objects.get_or_create(products=item, wish_list=wish_list)
+    if not created:
+        Wish_products.objects.filter(products=item, wish_list=wish_list).\
+                                update(quantity=F('quantity') + 1)
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+# ------------------------------------- End Wish Lisr ---------------------------------- #
+
+
+
+
+
+
+
+def buy_now(request,pk):
+    item = Product.objects.get(id=pk)
+    cart, created = Cart.objects.get_or_create(customer=request.user)
+    cart_products, created = Cart_Products.objects.get_or_create(products=item, cart=cart)
+    if not created:
+        Cart_Products.objects.filter(products=item, cart=cart).\
+                                update(quantity=F('quantity') + 1)
+    return redirect('cart')
+
+@login_required(login_url='auth-login')
+def account(request):
+    orders = Order.objects.filter(customer=request.user).order_by('-order_time')
+    context = {
+        'orders' : orders
+    }
+    return render(request, 'base/my-account.html' , context)
+
+
 
 @login_required(login_url='auth-login')
 def contact(request):
     return render(request,'base/contact.html' , {})
+
+
+
 
 @login_required(login_url='auth-login')
 def checkout(request):
@@ -109,194 +335,4 @@ def checkout(request):
     return render(request, 'base/checkout.html' , context)
 
 
-@login_required(login_url='auth-login')
-def wishlist(request):
-    return render(request, 'base/wishlist.html' , {})
-
-
-def product_list(request , page):
-    categories = Product_Category.objects.all()
-    q = request.GET.get('q') if request.GET.get('q') != None else ''
-    if q=='rating':
-        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
-                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('-rating')
-    elif q=='old':
-        products = Product.objects.annotate(rating = Sum(F('review__rating')))\
-                                    .annotate(stars = Avg(F('review__rating'))).all().order_by('rating')
-        
-    else:
-        products = Product.objects.filter(Q(name__contains = q) | Q(product_type__category__contains = q))\
-                                    .annotate(stars = Avg(F('review__rating'))).order_by('-time_added')
-        
-    paginator = Paginator(products, 3)
-    try:
-        products = paginator.page(page)
-    except EmptyPage:
-        products = paginator.page(paginator.num_pages)
-    context = {
-        'products' : products,
-        'categories' : categories
-    }
-    return render(request,'base/product-list.html' , context)
-
-
-
-@login_required(login_url='auth-login')
-def account(request):
-    orders = Order.objects.filter(customer=request.user).order_by('-order_time')
-    context = {
-        'orders' : orders
-    }
-    return render(request, 'base/my-account.html' , context)
-
-
-@login_required(login_url='auth-login')
-def product_detail(request , pk):
-    form = ReviewForm()
-    product = Product.objects.get(id=pk)
-    reviews = Review.objects.filter(product=product)
-    if request.method == 'POST':
-        form = ReviewForm(request.POST)
-        print(form.is_valid())
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.name = request.user
-            review.product = product
-            print(review)
-            review.save()
-            return redirect(request.path_info)
-
-    related_products = Product.objects.only('name','price','images').prefetch_related('images')\
-                                                                .filter(product_type=product.product_type)\
-                                                            .annotate(stars = Avg(F('review__rating')))
-    context = {
-    'product' : product,
-    'related_products' : related_products,
-    'form' : form,
-    'reviews' : reviews
-    }
-    try:
-        quantity = Cart_Products.objects.select_related('cart').get(products=product,cart__customer=request.user)
-        context['quantity'] = quantity
-
-    except(Product.DoesNotExist ,Cart_Products.DoesNotExist):
-        pass
-
-    return render(request, 'base/product-detail.html' , context)
-
-
-@login_required(login_url='auth-login')
-def cart(request):
-    sub_total = 0.0
-    shipping = 20.0
-    cart_items = Cart_Products.objects.select_related('products')\
-                                    .only('products__name','products__price','quantity','cart__customer')\
-                                    .select_related('cart__customer')\
-                                    .prefetch_related('products__images')\
-                                    .filter(cart__customer=request.user).annotate(
-                                        total = ExpressionWrapper(
-                                        F('products__price')*F('quantity'), output_field=FloatField()
-                                        ))
-    if cart_items.aggregate(sub_total = Sum('total'))['sub_total'] : 
-        sub_total = cart_items.aggregate(sub_total = Sum('total'))['sub_total'] 
-        
-    grand_total =  sub_total + shipping 
-
-    context = {
-        'cart_items' : cart_items,
-        'sub_total' : sub_total,
-        'grand_total' : grand_total
-    }
-    return render(request, 'base/cart.html' , context)
-
-
-@login_required(login_url='auth-login')
-def cart_item_number(request):
-    user = request.user
-    cart_items = Cart.objects.get(customer=user).items
-    context = {
-        'cart_items' : cart_items
-    }
-    return render(request , 'base/navbar.html' , context)
-
-
-
-
-def RemoveItem(request , pk):
-    item = Cart_Products.objects.get(id=pk)
-    item.delete()
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-def Remove_Wish(request , pk):
-    item = Wish_products.objects.get(id=pk)
-    item.delete()
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-def buy_now(request,pk):
-    item = Product.objects.get(id=pk)
-    cart, created = Cart.objects.get_or_create(customer=request.user)
-    cart_products, created = Cart_Products.objects.get_or_create(products=item, cart=cart)
-    if not created:
-        Cart_Products.objects.filter(products=item, cart=cart).\
-                                update(quantity=F('quantity') + 1)
-    return redirect('cart')
-
-
-
-def quantity_handler(request,pk,pk2):
-    item = Cart_Products.objects.get(id=pk)
-    if pk2 == 'add':
-        item.add_item
-    else:
-        if item.quantity == 1:
-            item.sub_item
-            item.delete()
-
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-def wish_handler(request,pk,pk2):
-    item = Wish_products.objects.get(id=pk)
-    if pk2 == 'add':
-        item.add_item
-    else:
-        item.sub_item
-
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-
-
-def wishlist(request):
-    wishlist = Wish_products.objects.select_related('products')\
-                                    .only('products__name','products__price','quantity')\
-                                    .prefetch_related('products__images')\
-                                    .filter(wish_list__customer=request.user)
-    context = {
-        'wishlist' : wishlist
-    }
-    return render(request, 'base/wishlist.html' , context)
-
-
-def add_to_cart(request,pk):
-    item = Product.objects.get(id=pk)
-    cart, created = Cart.objects.get_or_create(customer=request.user)
-    cart_products, created = Cart_Products.objects.get_or_create(products=item, cart=cart)
-    if not created:
-        Cart_Products.objects.filter(products=item, cart=cart).\
-                                update(quantity=F('quantity') + 1)
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-def add_to_wishes(request,pk):
-    item = Product.objects.get(id=pk)
-    wish_list, created = WhishList.objects.get_or_create(customer=request.user)
-    wish_products, created = Wish_products.objects.get_or_create(products=item, wish_list=wish_list)
-    if not created:
-        Wish_products.objects.filter(products=item, wish_list=wish_list).\
-                                update(quantity=F('quantity') + 1)
-
-    return redirect(request.META.get('HTTP_REFERER'))
 
