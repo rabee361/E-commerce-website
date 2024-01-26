@@ -1,7 +1,7 @@
 from django.shortcuts import render , redirect
 from .forms import *
 from .models import *
-from django.db.models import F , Q ,Avg , Sum ,Max , Min ,ExpressionWrapper , FloatField , Count
+from django.db.models import F , Q ,Avg , Sum ,ExpressionWrapper , FloatField , Count
 from django.contrib.auth import authenticate , login , logout
 from django.core.paginator import Paginator,EmptyPage
 from django.contrib.auth.decorators import login_required
@@ -35,6 +35,12 @@ def auth_register(request):
     }
     return render(request, 'base/authentication-register.html', context)
 
+
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect('auth-login')
 
 
 
@@ -118,10 +124,6 @@ def product_list(request , page):
         products = Product.objects.annotate(rating = Sum(F('review__rating')))\
                                     .annotate(stars = Avg(F('review__rating'))).all().order_by('rating')
         
-    # elif q=='sale':
-    #     products = Product.objects.annotate(sale = Count('order__'))\
-    #                                 .annotate(stars = Avg(F('review__rating'))).all()
-
     else:
         products = Product.objects.filter(Q(name__contains = q) | Q(product_type__category__contains = q))\
                                     .annotate(stars = Avg(F('review__rating'))).order_by('-time_added')
@@ -218,9 +220,6 @@ def cart_item_number(request):
     return render(request , 'base/navbar.html' , context)
 
 
-def logoutUser(request):
-    logout(request)
-    return redirect('auth-login')
 
 
 def RemoveItem(request , pk):
@@ -243,7 +242,6 @@ def buy_now(request,pk):
         Cart_Products.objects.filter(products=item, cart=cart).\
                                 update(quantity=F('quantity') + 1)
     return redirect('cart')
-
 
 
 

@@ -56,13 +56,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'base',
     'captcha',
-    'phone_field'
+    'rest_framework',
+    'phone_field',
+    # 'admin_reorder'
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'admin_reorder.middleware.ModelAdminReorder',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -94,6 +97,19 @@ WSGI_APPLICATION = 'E_commerce_pro.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+
+
+# ADMIN_REORDER = (
+#     # First model entry group
+#     {'app': 'auth', 'models': ('auth.User', 'auth.Group')},
+
+#     # Second model entry group
+#     {'app': 'my_app', 'models': ('base.Prdouct', 'base.Cart_Products'), 'label': 'products'},
+
+#     # Third model entry group
+#     {'app': 'my_second_app', 'label': 'User Content'},
+# )
 
 
 
@@ -159,3 +175,5 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'base.MyUser'
+
+LOGIN_URL = 'login/'

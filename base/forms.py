@@ -21,6 +21,21 @@ class NewUser(UserCreationForm):
         fields = ("username","email","password1","password2")
         
 
+
+
+class NewUserApi(UserCreationForm):
+    email = forms.EmailField()
+    username = forms.CharField()
+    password1 = forms.CharField()
+    password2 = forms.CharField()
+
+    class Meta:
+        model = MyUser
+        fields = ("username","email","password1","password2")
+
+
+
+
 PAYMENT_CHOICES = (
     ('paypal', 'PayPal'),
     ('payoneer', 'Payoneer'),

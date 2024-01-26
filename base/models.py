@@ -61,7 +61,6 @@ class Image(models.Model):
 
 
 class Product(models.Model):
-
     name = models.CharField(max_length=50 , db_index=True)
     decription = models.TextField(max_length=200 , null=True)
     time_added = models.DateTimeField(auto_now_add=True , db_index=True)
@@ -101,10 +100,6 @@ class Cart_Products(models.Model):
     class Meta:
         ordering = ['products__time_added']
 
-    # @property
-    # def total(self):
-    #     return float(self.quantity * self.products.price)
-    
     @property
     def add_item(self):
         self.quantity = self.quantity + 1
@@ -165,3 +160,5 @@ class Wish_products(models.Model):
 
     def __str__(self):
         return self.products.name
+
+    
